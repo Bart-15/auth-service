@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Callback, Context } from 'aws-lambda';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
 
@@ -26,23 +28,31 @@ const generatePolicy = (principalId: unknown, methodArn: string) => {
 };
 
 export const handler = (
-  event: APIGatewayProxyEventV2 & { authorizationToken: string; methodArn: string }
+  event: APIGatewayProxyEventV2 & { authorizationToken: string; methodArn: string },
+  context: Context,
+  callback: Callback
 ) => {
   if (!event.authorizationToken) {
-    throw 'Unauthorized';
+    return callback('Unauthorized');
   }
 
-  const token = event.authorizationToken.replace('Bearer ', '');
-
+  const tokenParts = event.authorizationToken.split(' ');
+  const tokenValue = tokenParts[1];
+  const options = { audience: config.AUTH0_CLIENT_ID };
   try {
-    const claims = jwt.verify(token, config.AUTH0_PUBLIC_KEY);
-    const policy = generatePolicy(claims.sub, event.methodArn);
-
-    return {
-      ...policy,
-      context: claims,
-    };
+    jwt.verify(tokenValue, config.AUTH0_PUBLIC_KEY, options, (verifyError, decoded) => {
+      if (verifyError) {
+        console.log('verifyError', verifyError);
+        // 401 Unauthorized
+        console.log(`Token invalid. ${verifyError}`);
+        return callback('Unauthorized');
+      }
+      // is custom authorizer function
+      console.log('valid from customAuthorizer', decoded);
+      return callback(null, generatePolicy(decoded?.sub, event.methodArn));
+    });
   } catch (error) {
-    throw 'Unauthorized';
+    console.log('catch error. Invalid token', error);
+    return callback('Unauthorized');
   }
 };

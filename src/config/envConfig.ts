@@ -4,15 +4,18 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 interface ENV {
+  AUTH0_CLIENT_ID: string | undefined;
   AUTH0_PUBLIC_KEY: string | undefined;
 }
 
 interface Config {
+  AUTH0_CLIENT_ID: string;
   AUTH0_PUBLIC_KEY: string;
 }
 
 export const getConfig = (): ENV => {
   return {
+    AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
     AUTH0_PUBLIC_KEY: process.env.AUTH0_PUBLIC_KEY,
   };
 };

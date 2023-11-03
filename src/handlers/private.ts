@@ -1,7 +1,6 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-
-export const handler = (event: APIGatewayProxyEventV2, context: APIGatewayProxyResultV2) => {
-  return {
+import { ProxyHandler } from '../types/handler.types';
+export const handler: ProxyHandler = (event, context, callback) => {
+  callback(null, {
     statusCode: 200,
     headers: {
       /* Required for CORS support to work */
@@ -10,8 +9,7 @@ export const handler = (event: APIGatewayProxyEventV2, context: APIGatewayProxyR
       'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify({
-      event,
-      context,
+      message: 'Hi ⊂◉‿◉つ from Private API. Only logged in users can see this',
     }),
-  };
+  });
 };
