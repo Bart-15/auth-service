@@ -49,7 +49,8 @@ export const handler = (
       }
       // is custom authorizer function
       console.log('valid from customAuthorizer', decoded);
-      return callback(null, generatePolicy(decoded?.sub, event.methodArn));
+      const policy = generatePolicy(decoded?.sub, event.methodArn);
+      return callback(null, { ...policy, context: decoded });
     });
   } catch (error) {
     console.log('catch error. Invalid token', error);
