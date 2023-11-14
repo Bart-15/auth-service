@@ -2,6 +2,7 @@ node_modules
 jspm_packages
 .serverless
 .webpack
+.webpackCache
 .env*
 lib/
 .build/
